@@ -1,0 +1,24 @@
+services:
+  app:
+    build:
+      context: .
+    ports:
+      - "8080:8080"
+    environment:
+      APP_ENV: dev
+      APP_SECRET: change_me_dev_secret
+      DATABASE_URL: "postgresql://app:app@db:5432/library?serverVersion=16&charset=utf8"
+    depends_on:
+      - db
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+      POSTGRES_DB: library
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:
