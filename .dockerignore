@@ -1,0 +1,10 @@
+/.git/
+/.idea/
+/var/
+/vendor/
+/.env.local
+/.env.*.local
+/docker-compose.yml
+/compose.override.yaml
+/.dockerignore
+/README.md
