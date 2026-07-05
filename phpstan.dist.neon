@@ -1,0 +1,14 @@
+includes:
+    - vendor/phpstan/phpstan-symfony/extension.neon
+    - vendor/phpstan/phpstan-symfony/rules.neon
+
+parameters:
+    level: 6
+    paths:
+        - src
+    ignoreErrors:
+        # False positive: Symfony calls Kernel::getAllowedEnvs() internally through
+        # the kernel trait to enforce allowed APP_ENV values, so it is not really unused.
+        -
+            message: '#Method App\\Kernel::getAllowedEnvs\(\) is unused\.#'
+            path: src/Kernel.php
