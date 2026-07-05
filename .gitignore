@@ -17,3 +17,6 @@
 /phpunit.xml
 /.phpunit.cache/
 ###< phpunit/phpunit ###
+
+# Auto-generated Symfony config reference (IDE-only helper, not used at runtime)
+/config/reference.php
