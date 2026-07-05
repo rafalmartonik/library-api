@@ -1,0 +1,179 @@
+openapi: 3.0.3
+info:
+    title: Library API
+    version: '1.0.0'
+    description: 'Simple library API: manage books and their borrow state.'
+servers:
+    - url: /
+      description: Current host
+tags:
+    - name: Books
+paths:
+    /api/books:
+        get:
+            tags: [Books]
+            summary: List all books
+            responses:
+                '200':
+                    description: The list of books, ordered by title.
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/Book'
+        post:
+            tags: [Books]
+            summary: Add a new book
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CreateBookRequest'
+            responses:
+                '201':
+                    description: Book created.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Book'
+                '409':
+                    description: A book with this serial number already exists.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                '422':
+                    description: Validation failed.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ValidationErrors'
+    /api/books/{serialNumber}:
+        parameters:
+            - name: serialNumber
+              in: path
+              required: true
+              schema:
+                  type: string
+                  pattern: '^\d{6}$'
+                  example: '123456'
+        patch:
+            tags: [Books]
+            summary: Change a book's borrow state
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UpdateBookStatusRequest'
+            responses:
+                '200':
+                    description: The updated book.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Book'
+                '404':
+                    description: Book not found.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                '409':
+                    description: Book is already borrowed, or is not borrowed on return.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                '422':
+                    description: Validation failed (e.g. borrowing without a card number).
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ValidationErrors'
+        delete:
+            tags: [Books]
+            summary: Remove a book
+            responses:
+                '204':
+                    description: Book removed.
+                '404':
+                    description: Book not found.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+components:
+    schemas:
+        Book:
+            type: object
+            properties:
+                serialNumber:
+                    type: string
+                    pattern: '^\d{6}$'
+                    example: '123456'
+                title:
+                    type: string
+                    example: Solaris
+                author:
+                    type: string
+                    example: Stanisław Lem
+                borrowed:
+                    type: boolean
+                    example: false
+                borrowedByCardNumber:
+                    type: string
+                    nullable: true
+                    pattern: '^\d{6}$'
+                    example: null
+                borrowedAt:
+                    type: string
+                    format: date-time
+                    nullable: true
+                    example: null
+        CreateBookRequest:
+            type: object
+            required: [serialNumber, title, author]
+            properties:
+                serialNumber:
+                    type: string
+                    pattern: '^\d{6}$'
+                    example: '123456'
+                title:
+                    type: string
+                    maxLength: 255
+                    example: Solaris
+                author:
+                    type: string
+                    maxLength: 255
+                    example: Stanisław Lem
+        UpdateBookStatusRequest:
+            type: object
+            required: [borrowed]
+            properties:
+                borrowed:
+                    type: boolean
+                    example: true
+                cardNumber:
+                    type: string
+                    nullable: true
+                    pattern: '^\d{6}$'
+                    description: Required when borrowing (borrowed=true).
+                    example: '654321'
+        Error:
+            type: object
+            properties:
+                error:
+                    type: string
+                    example: 'Book with serial number "123456" was not found.'
+        ValidationErrors:
+            type: object
+            properties:
+                errors:
+                    type: object
+                    additionalProperties:
+                        type: string
+                    example:
+                        serialNumber: Serial number must be a 6-digit number.
