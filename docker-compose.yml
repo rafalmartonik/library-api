@@ -12,6 +12,7 @@ services:
       - ./config:/app/config
       - ./migrations:/app/migrations
       - ./tests:/app/tests
+      - ./openapi.yaml:/app/openapi.yaml
     depends_on:
       - db
 
