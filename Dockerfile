@@ -17,8 +17,7 @@ RUN composer install --no-scripts --no-progress --no-interaction --prefer-dist
 
 COPY . .
 
-RUN composer install --no-progress --no-interaction --prefer-dist \
-    && composer dump-autoload --optimize --no-dev --classmap-authoritative || composer dump-autoload --optimize
+RUN composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader
 
 COPY docker/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
 RUN chmod +x /usr/local/bin/docker-entrypoint

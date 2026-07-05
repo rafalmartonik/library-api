@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<ruleset name="library-api">
+    <description>PSR-12 coding standard for application code.</description>
+
+    <file>src</file>
+
+    <arg name="basepath" value="."/>
+    <arg name="colors"/>
+    <arg value="sp"/>
+
+    <rule ref="PSR12"/>
+</ruleset>
