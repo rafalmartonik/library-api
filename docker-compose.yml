@@ -5,7 +5,6 @@ services:
     ports:
       - "8080:8080"
     environment:
-      APP_ENV: dev
       APP_SECRET: change_me_dev_secret
       DATABASE_URL: "postgresql://app:app@db:5432/library?serverVersion=16&charset=utf8"
     volumes:
