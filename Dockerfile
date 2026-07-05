@@ -8,6 +8,10 @@ RUN install-php-extensions \
     opcache \
     zip
 
+# Composer runs as root during the image build; without this flag Composer disables
+# plugins (including Flex), which breaks the symfony-cmd auto-scripts.
+ENV COMPOSER_ALLOW_SUPERUSER=1
+
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
