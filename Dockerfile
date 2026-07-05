@@ -22,7 +22,6 @@ RUN composer install --no-progress --no-interaction --prefer-dist --optimize-aut
 COPY docker/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
 RUN chmod +x /usr/local/bin/docker-entrypoint
 
-ENV APP_ENV=dev
 # On Railway entrypoint will change SERVER_NAME na ":$PORT"
 ENV SERVER_NAME=:8080
 EXPOSE 8080
