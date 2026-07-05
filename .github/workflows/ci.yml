@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    name: Lint & Test
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: app
+          POSTGRES_PASSWORD: app
+          POSTGRES_DB: library
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U app"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      # Real env var wins over .env; the test env appends the "_test" suffix (see doctrine.yaml).
+      DATABASE_URL: "postgresql://app:app@127.0.0.1:5432/library?serverVersion=16&charset=utf8"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_pgsql, intl, opcache, zip
+          ini-values: memory_limit=-1
+          coverage: none
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: composer-
+
+      - name: Install dependencies
+        run: composer install --no-scripts --no-progress --no-interaction --prefer-dist
+
+      - name: Coding standard (phpcs)
+        run: vendor/bin/phpcs
+
+      - name: Static analysis (phpstan)
+        run: vendor/bin/phpstan analyse
+
+      - name: Create test database
+        run: php bin/console doctrine:database:create --if-not-exists --no-interaction --env=test
+
+      - name: Run migrations
+        run: php bin/console doctrine:migrations:migrate --no-interaction --env=test
+
+      - name: Tests (phpunit)
+        run: vendor/bin/phpunit
